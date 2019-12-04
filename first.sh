@@ -6,8 +6,6 @@ else
     WORKINGDIR=$1
 fi
 
-
-WORKINGDIR="/c/Users/s682936/Documents/awscli-script"
 LOGSDIR="$WORKINGDIR/logs"
 SYNCHPATH="$WORKINGDIR/approved"
 LOGSPATH="$WORKINGDIR/synchS3.log"
