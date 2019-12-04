@@ -1,5 +1,12 @@
 #!/bin/sh
 
+if [ "$1" != "" ]; then
+    WORKINGDIR="~/awscli-script"
+else
+    WORKINGDIR=$1
+fi
+
+
 WORKINGDIR="/c/Users/s682936/Documents/awscli-script"
 LOGSDIR="$WORKINGDIR/logs"
 SYNCHPATH="$WORKINGDIR/approved"
@@ -16,5 +23,4 @@ CURRDATE=`date`
 [ ! -d $SYNCHPATH ] && mkdir $SYNCHPATH 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
-S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
-
+#S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
