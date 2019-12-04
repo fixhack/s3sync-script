@@ -16,9 +16,9 @@ S3SYNCHRONIZED="s3://$BUCKETNAME/invoices/synchronized"
 
 CURRDATE=`date`
 
-[ ! -d $AWSCLIDIR ] && mkdir $AWSCLIDIR 
-[ ! -d $LOGSDIR ] && mkdir $LOGSDIR 
-[ ! -d $SYNCHPATH ] && mkdir $SYNCHPATH 
-[ ! -f $LOGSPATH ] && touch $LOGSPATH
+[ ! -d $AWSCLIDIR ] && mkdir -p $AWSCLIDIR 
+[ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
+[ ! -d $SYNCHPATH ] && mkdir -p $SYNCHPATH 
+[ ! -f $LOGSPATH ] && touch -p $LOGSPATH
 
 #S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
