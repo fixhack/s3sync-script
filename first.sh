@@ -1,9 +1,9 @@
 #!/bin/sh
 
 if [ "$1" != "" ]; then
-    WORKINGDIR="~/awscli-script"
-else
     WORKINGDIR=$1
+else
+    WORKINGDIR="~/awscli-script"
 fi
 
 LOGSDIR="$WORKINGDIR/logs"
