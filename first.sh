@@ -3,7 +3,7 @@
 if [ "$1" != "" ]; then
     WORKINGDIR=$1
 else
-    WORKINGDIR="~/awscli-script"
+    WORKINGDIR="$HOME/awscli-script"
 fi
 
 LOGSDIR="$WORKINGDIR/logs"
