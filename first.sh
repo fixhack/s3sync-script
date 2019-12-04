@@ -19,6 +19,6 @@ CURRDATE=`date`
 [ ! -d $AWSCLIDIR ] && mkdir -p $AWSCLIDIR 
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
 [ ! -d $SYNCHPATH ] && mkdir -p $SYNCHPATH 
-[ ! -f $LOGSPATH ] && touch -p $LOGSPATH
+[ ! -f $LOGSPATH ] && touch $LOGSPATH
 
 #S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
