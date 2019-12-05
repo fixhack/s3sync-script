@@ -10,7 +10,7 @@ LOGSDIR="$WORKINGDIR/logs"
 SYNCHPATH="$WORKINGDIR/approved"
 LOGSPATH="$WORKINGDIR/synchS3.log"
 
-BUCKETNAME="csg-cert-zfia-analytics-apdocumentsc789d3eb-npfkuzs07135"
+BUCKETNAME="csg-dev-zfia-analytics-apdocumentsc789d3eb-v8hk9ah5euyw"
 S3APPROVED="s3://$BUCKETNAME/invoices/approved"
 S3SYNCHRONIZED="s3://$BUCKETNAME/invoices/synchronized"
 
