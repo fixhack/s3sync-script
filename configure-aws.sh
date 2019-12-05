@@ -37,5 +37,7 @@ if [ "${AWS_SECRET_KEY}" == "" ]; then
   read AWS_SECRET_KEY
 fi
 
-echo "Code 1: ${AWS_ACCESS_KEY}"
-echo "Code 2: ${AWS_SECRET_KEY}"
+ACCESS_KEY_ADD=`aws configure set aws_access_key_id ${AWS_ACCESS_KEY}`
+#SECRET_KEY_ADD=`aws configure set aws_secret_access_key ${AWS_SECRET_KEY}`
+echo "RESPONSE: ${ACCESS_KEY_ADD}"
+#echo "Code 2: ${AWS_SECRET_KEY}"
