@@ -34,10 +34,12 @@ while getopts ":k:s:" options; do
 done
 
 if [ "${AWS_ACCESS_KEY}" == "" ]; then
+  echo "Write value for AWS_ACCESS_KEY: "
   read AWS_ACCESS_KEY
 fi
 
 if [ "${AWS_SECRET_KEY}" != "" ]; then
+  echo "Write value for AWS_SECRET_KEY: "
   read AWS_SECRET_KEY
 fi
 
