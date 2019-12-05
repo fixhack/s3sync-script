@@ -1,11 +1,5 @@
 #!/bin/sh
 
-if [ "$1" != "" ]; then
-  WORKINGDIR=$1
-else
-  WORKINGDIR="$HOME/awscli-script"
-fi
-
 usage() {
   echo "Usega: $0 [ -k ACCESS_KEY ] [ -s SECRET KEY ]" 1>&2
 }
@@ -38,7 +32,7 @@ if [ "${AWS_ACCESS_KEY}" == "" ]; then
   read AWS_ACCESS_KEY
 fi
 
-if [ "${AWS_SECRET_KEY}" != "" ]; then
+if [ "${AWS_SECRET_KEY}" == "" ]; then
   echo "Write value for AWS_SECRET_KEY: "
   read AWS_SECRET_KEY
 fi
