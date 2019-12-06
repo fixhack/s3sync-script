@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-  echo "Usega: $0 [ -k ACCESS_KEY ] [ -s SECRET KEY ]" 1>&2
+  echo "Usage: $0 [ -k ACCESS_KEY ] [ -s SECRET KEY ]" 1>&2
 }
 
 exit_abnormal() {
