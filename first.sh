@@ -21,8 +21,8 @@ CURRDATE=`date`
 [ ! -d $SYNCHPATH ] && mkdir -p $SYNCHPATH 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
-S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
+S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH | grep -oP 's3:\/\/.[^\s]*'`
 
-for item in `grep -oP 's3:\/\/.[^\s]*' ${S3SYNCHRESPONSE}`; do
+for item in ${S3SYNCHRESPONSE}; do
     echo $item
 done
