@@ -23,7 +23,6 @@ CURRDATE=`date`
 
 S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH`
 
-for item in ${S3SYNCHRESPONSE}; do
+for item in `grep -oP 's3:\/\/.[^\s]*' ${S3SYNCHRESPONSE}`; do
     echo $item
-    #echo `grep -o 's3:\/\/.[^\s]*' $item`
 done
