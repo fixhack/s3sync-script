@@ -34,7 +34,7 @@ if [ "$WORKINGDIR" == "" ]; then
     WORKINGDIR="$HOME/awscli-script"
 fi
 
-if [ "$WORKINGDIR" == "" ]; then
+if [ "$S3BUCKETNAME" == "" ]; then
   S3BUCKETNAME="csg-dev-zfia-analytics-apdocumentsc789d3eb-v8hk9ah5euyw"
 fi
 
