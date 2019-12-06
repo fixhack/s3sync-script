@@ -23,6 +23,13 @@ CURRDATE=`date`
 
 S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH | grep -oP 's3:\/\/.[^\s]*'`
 
-for item in ${S3SYNCHRESPONSE}; do
-    echo $item
-done
+if [ "${S3SYNCHRESPONSE}" != "" ]; then
+    FILECOUNT=0
+    for item in ${S3SYNCHRESPONSE}; do
+        aws s3 mv $item $S3SYNCHRONIZED
+        ((FILECOUNT=FILECOUNT+1))
+    done
+    echo "$FILECOUNT file/s synchronized and moved on $CURRDATE"
+else 
+    echo "No files synchronized on $CURRDATE" 
+fi
