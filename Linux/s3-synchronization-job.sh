@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-  echo "Usage: $0 [ -d WORKING_DIR ] [ -b S3_BUCKET_NAME ]" 1>&2
+  echo "Usage: $0 [ -b S3_BUCKET_NAME ] [ -o OUTPUT_DIR ]" 1>&2
 }
 
 exit_abnormal() {
@@ -9,13 +9,13 @@ exit_abnormal() {
   exit 1
 }
 
-while getopts ":k:hs:" options; do
+while getopts ":b:o:h" options; do
   case "${options}" in
     b)
       S3BUCKETNAME=${OPTARG}
       ;;
-    d)
-      WORKINGDIR=${OPTARG}
+    o)
+      OUTPUTDIR=${OPTARG}
       ;;
     h)
       usage
@@ -30,16 +30,18 @@ while getopts ":k:hs:" options; do
   esac
 done
 
-if [ "$WORKINGDIR" == "" ]; then
-    WORKINGDIR="$HOME/awscli-script"
+if [ ! -w $OUTPUTDIR ]; then
+  echo "ERROR: OUTPUT_DIR directory has to be writable by sap-s3-sync user."
+  exit_abnormal
 fi
 
 if [ "$S3BUCKETNAME" == "" ]; then
   S3BUCKETNAME="csg-dev-zfia-analytics-apdocumentsc789d3eb-v8hk9ah5euyw"
 fi
 
+WORKINGDIR="$HOME/awscli-scripts"
+
 LOGSDIR="$WORKINGDIR/logs"
-SYNCHPATH="$WORKINGDIR/approved"
 LOGSPATH="$WORKINGDIR/synchS3.log"
 S3APPROVED="s3://$S3BUCKETNAME/invoices/approved/"
 S3SYNCHRONIZED="s3://$S3BUCKETNAME/invoices/synchronized/"
@@ -48,10 +50,9 @@ CURRDATE=`date`
 
 [ ! -d $AWSCLIDIR ] && mkdir -p $AWSCLIDIR 
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
-[ ! -d $SYNCHPATH ] && mkdir -p $SYNCHPATH 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
-S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $SYNCHPATH | grep -oP 's3:\/\/.[^\s]*'`
+S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $OUTPUTDIR | grep -oP 's3:\/\/.[^\s]*'`
 
 if [ "${S3SYNCHRESPONSE}" != "" ]; then
     FILECOUNT=0

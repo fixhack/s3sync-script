@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-  echo "Usage: $0 [ -k ACCESS_KEY ] [ -s SECRET KEY ]" 1>&2
+  echo "Usage: $0 [ -u AWS_USER_NAME ] [ -r ROLE_ARN ] [ -b S3_BUCKET_NAME ] [ -o OUTPUT_DIR ]" 1>&2
 }
 
 exit_abnormal() {
@@ -9,13 +9,36 @@ exit_abnormal() {
   exit 1
 }
 
-while getopts ":k:s:" options; do
+exit_help() {
+  usage
+  exit 0
+}
+
+uflag=false
+rflag=false
+bflag=false
+oflag=false
+
+while getopts ":u:r:b:o:h" options; do
   case "${options}" in
-    k)
-      AWS_ACCESS_KEY=${OPTARG}
+    u)
+      AWS_USER_NAME=${OPTARG}
+      uflag=true
       ;;
-    s)
-      AWS_SECRET_KEY=${OPTARG}
+    r)
+      AWS_ROLE_ARN=${OPTARG}
+      rflag=true
+      ;;
+    b)
+      S3_BUCKET_NAME=${OPTARG}
+      bflag=true
+      ;;
+    o)
+      OUTPUT_DIR=${OPTARG}
+      oflag=true
+      ;;
+    h)
+      exit_help
       ;;
     :)
       echo "ERROR: -${OPTARG} requires an argument."
@@ -27,15 +50,65 @@ while getopts ":k:s:" options; do
   esac
 done
 
-if [ "${AWS_ACCESS_KEY}" == "" ]; then
-  echo "Write value for AWS_ACCESS_KEY: "
-  read AWS_ACCESS_KEY
+if [ ${uflag} != true ]; then
+  echo "ERROR: option -u is required."
+  exit_abnormal
 fi
 
-if [ "${AWS_SECRET_KEY}" == "" ]; then
-  echo "Write value for AWS_SECRET_KEY: "
-  read AWS_SECRET_KEY
+if [ ${rflag} != true ]; then
+  echo "ERROR: option -r is required."
+  exit_abnormal
 fi
 
-ACCESS_KEY_ADD=`aws configure set aws_access_key_id ${AWS_ACCESS_KEY}`
-SECRET_KEY_ADD=`aws configure set aws_secret_access_key ${AWS_SECRET_KEY}`
+if [ ${oflag} != true ]; then
+  echo "ERROR: option -o is required."
+  exit_abnormal
+fi
+
+if [ ${bflag} != true ]; then
+  echo "ERROR: option -b is required."
+  exit_abnormal
+fi
+
+if [ ! -w $OUTPUTDIR ]; then
+  echo "ERROR: OUTPUT_DIR directory has to be writable by sap-s3-sync user."
+  exit_abnormal
+fi
+
+AWS_ASSUME_ROLE_COMMAND=`aws sts assume-role --role-arn "${AWS_ROLE_ARN}" --role-session-name AWSCLI-Session`
+
+if [ "$?" != 0 ]; then
+  echo "Error executing aws assume-role command: ${AWS_CREATE_ACCESS_KEY_COMMAND}"
+  exit_abnormal
+fi
+
+export AWS_ACCESS_KEY_ID=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['Credentials']['AccessKeyId']; print(info)"`
+export AWS_SECRET_ACCESS_KEY=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['Credentials']['SecretAccessKey']; print(info)"`
+export AWS_SESSION_TOKEN=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['Credentials']['SessionToken']; print(info)"`
+
+#PYTHONVERSION=`python -V 2>&1 | grep -Po '(?<=Python )(.+)'`
+AWS_CREATE_ACCESS_KEY_COMMAND=`aws iam create-access-key --user-name ${AWS_USER_NAME}`
+
+if [ "$?" != 0 ]; then
+  echo "Error executing aws create-access-key command: ${AWS_CREATE_ACCESS_KEY_COMMAND}"
+  exit_abnormal
+fi
+
+ACCESSKEYID=`echo ${AWS_CREATE_ACCESS_KEY_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['AccessKey']['AccessKeyId']; print(info)"`
+SECRETACCESSKEY=`echo ${AWS_CREATE_ACCESS_KEY_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['AccessKey']['SecretAccessKey']; print(info)"`
+
+cat <<EOF > ./credentials
+[default]
+${ACCESSKEYID}
+${SECRETACCESSKEY} 
+EOF
+
+groupadd sap-s3-sync
+useradd -m -s /usr/sbin/nologin -g sap-s3-sync sap-s3-sync
+
+install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/sap-s3-sync/.aws/
+install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/sap-s3-sync/awscli-scripts/
+install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./s3-synchronization-job.sh /home/sap-s3-sync/awscli-scripts/
+install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./credentials /home/sap-s3-sync/.aws/
+
+echo "05 * * * * sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o ${OUTPUT_DIR}" >> /etc/crontab 
