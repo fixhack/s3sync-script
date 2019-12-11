@@ -99,8 +99,8 @@ SECRETACCESSKEY=`echo ${AWS_CREATE_ACCESS_KEY_COMMAND} | python -c "import sys, 
 
 cat <<EOF > ./credentials
 [default]
-${ACCESSKEYID}
-${SECRETACCESSKEY} 
+aws_access_key_id = ${ACCESSKEYID}
+aws_secret_access_key = ${SECRETACCESSKEY} 
 EOF
 
 groupadd sap-s3-sync
@@ -111,4 +111,4 @@ install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/sap-s3-sync/awscli-s
 install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./s3-synchronization-job.sh /home/sap-s3-sync/awscli-scripts/
 install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./credentials /home/sap-s3-sync/.aws/
 
-echo "05 * * * * sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o ${OUTPUT_DIR}" >> /etc/crontab 
+echo "*/5 * * * * sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o ${OUTPUT_DIR}" >> /etc/crontab 

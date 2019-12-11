@@ -52,11 +52,17 @@ CURRDATE=`date`
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
-S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $OUTPUTDIR | grep -oP 's3:\/\/.[^\s]*'`
+S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $OUTPUTDIR 2>&1 | tee -a $LOGSPATH`
 
-if [ "${S3SYNCHRESPONSE}" != "" ]; then
+if [ "$?" != 0 ]; then
+    exit 1
+fi
+
+GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | grep -oP 's3:\/\/.[^\s]*'`
+
+if [ "${GREPRESPONSE}" != "" ]; then
     FILECOUNT=0
-    for item in ${S3SYNCHRESPONSE}; do
+    for item in ${GREPRESPONSE}; do
         S3MOVERESPONSE=`aws s3 mv $item $S3SYNCHRONIZED`
         ((FILECOUNT=FILECOUNT+1))
     done
