@@ -62,7 +62,7 @@ if [ "$?" != 0 ]; then
   exit_abnormal
 fi
 
-if [ ${mflag} != true && ${Hflag} != true && ${dflag} != true && ${bflag} != true && ${oflag} != true ]; then
+if [[ ${mflag} != true && ${Hflag} != true && ${dflag} != true && ${bflag} != true && ${oflag} != true ]]; then
   echo "${GET_GREP_COMMAND}"
   exit 0
 fi
