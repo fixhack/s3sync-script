@@ -24,23 +24,23 @@ while getopts ":m:H:d:b:o:h" options; do
   case "${options}" in
     m)
       MINUTE=${OPTARG}
-      anyflag=true
+      mflag=true
       ;;
     H)
       HOUR=${OPTARG}
-      anyflag=true
+      Hflag=true
       ;;
     d)
       DAY=${OPTARG}
-      anyflag=true
+      dflag=true
       ;;
     b)
       S3_BUCKET_NAME=${OPTARG}
-      anyflag=true
+      bflag=true
       ;;
     o)
       OUTPUT_DIR=${OPTARG}
-      anyflag=true
+      oflag=true
       ;;
     h)
       exit_help
@@ -62,12 +62,32 @@ if [ "$?" != 0 ]; then
   exit_abnormal
 fi
 
-if [ ${anyflag} != true ]; then
+if [ ${mflag} != true && ${Hflag} != true && ${dflag} != true && ${bflag} != true && ${oflag} != true ]; then
   echo "${GET_GREP_COMMAND}"
   exit 0
 fi
 
-if [ ! -w $OUTPUTDIR ]; then
-  echo "ERROR: OUTPUT_DIR directory has to be writable by sap-s3-sync user."
-  exit_abnormal
+if [ ${oflag} == true ]; then
+  if [ ! -w $OUTPUTDIR ]; then
+    echo "ERROR: OUTPUT_DIR directory has to be writable by sap-s3-sync user."
+    exit_abnormal
+  fi
+fi
+
+if [ ${mflag} == true ]; then
+  if [[ ! (${MINUTE} -ge 1 && ${MINUTE} -le 59) ]]; then
+    echo "Nop"
+    exit 0
+  else 
+    echo "Yeap"
+    exit 0
+  fi
+fi
+
+if [ ${Hflag} == true ]; then
+
+fi
+
+if [ ${dflag} == true ]; then
+
 fi
