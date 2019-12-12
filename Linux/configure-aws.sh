@@ -68,7 +68,7 @@ if [[ ${mflag} != true && ${Hflag} != true && ${dflag} != true && ${bflag} != tr
 fi
 
 if [ ${bflag} != true ]; then
-  S3_BUCKET_NAME=`grep -oP '((?<=-b )(.+)(?= [-\b]+))|((?<=-b )(.+))' "${GET_GREP_COMMAND}"`
+  S3_BUCKET_NAME=`grep -oP '((?<=-b )(.+)(?= [-\b]+))|((?<=-b )(.+))' < "${GET_GREP_COMMAND}"`
 fi
 
 if [ ${oflag} == true ]; then
