@@ -55,7 +55,7 @@ CURRDATE=`date`
 S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $OUTPUTDIR 2>&1 | tee -a $LOGSPATH`
 
 if [ "$?" != 0 ]; then
-    exit 1
+    echo "ERROR: ${S3SYNCRESPONSE}" >> $LOGSPATH
 fi
 
 GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | grep -oP 's3:\/\/.[^\s]*'`
@@ -63,10 +63,10 @@ GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | grep -oP 's3:\/\/.[^\s]*'`
 if [ "${GREPRESPONSE}" != "" ]; then
     FILECOUNT=0
     for item in ${GREPRESPONSE}; do
-        S3MOVERESPONSE=`aws s3 mv $item $S3SYNCHRONIZED`
+        S3MOVERESPONSE=`aws s3 mv $item $S3SYNCHRONIZED 2>&1 | tee -a $LOGSPATH`
         ((FILECOUNT=FILECOUNT+1))
     done
-    echo "$FILECOUNT file/s synchronized and moved on $CURRDATE"
-else 
-    echo "No files synchronized on $CURRDATE" 
+    echo "$FILECOUNT file/s synchronized and moved on $CURRDATE" >> $LOGSPATH
+else
+    echo "No files synchronized on $CURRDATE" >> $LOGSPATH
 fi
