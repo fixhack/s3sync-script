@@ -68,7 +68,7 @@ if [[ ${mflag} != true && ${Hflag} != true && ${dflag} != true && ${bflag} != tr
 fi
 
 if [ ${bflag} != true ]; then
-  S3_BUCKET_NAME=`grep -oP '((?<=-b )(.+)(?= [-\b]+))|((?<=-b )(.+))' < "${GET_GREP_COMMAND}"`
+  S3_BUCKET_NAME=`grep -oP '((?<=-b )(.+)(?= [-\b]+))|((?<=-b )(.+))' <<< ${GET_GREP_COMMAND}`
 fi
 
 if [ ${oflag} == true ]; then
@@ -76,6 +76,8 @@ if [ ${oflag} == true ]; then
     echo "ERROR: OUTPUT_DIR directory has to be writable by sap-s3-sync user."
     exit_abnormal
   fi
+else
+  OUTPUTDIR=`grep -oP '((?<=-o )(.+)(?= [-\b]+))|((?<=-o )(.+))' <<< ${GET_GREP_COMMAND}`
 fi
 
 if [ ${mflag} == true ]; then
@@ -111,4 +113,4 @@ else
   DAY=""
 fi
 
-echo "*${MINUTE} *${HOUR} * * *${DAY} sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o /tmp"
+echo "*${MINUTE} *${HOUR} * * *${DAY} sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o ${OUTPUTDIR}"
