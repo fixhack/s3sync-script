@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-  echo "Usage: $0 [ -u AWS_USER_NAME ] [ -r ROLE_ARN ] [ -b S3_BUCKET_NAME ] [ -o OUTPUT_DIR ]" 1>&2
+  echo "Usage: $0 [ -h ] [ -x ] [ -u AWS_USER_NAME -r ROLE_ARN -b S3_BUCKET_NAME -o OUTPUT_DIR ]" 1>&2
 }
 
 exit_abnormal() {
@@ -14,12 +14,19 @@ exit_help() {
   exit 0
 }
 
+remove_func() {
+  grep -v 's3-synchronization-job.sh' /etc/crontab > /etc/crontab
+  userdel -f -r sap-s3-sync
+  groupadd sap-s3-sync
+  exit 0
+}
+
 uflag=false
 rflag=false
 bflag=false
 oflag=false
 
-while getopts ":u:r:b:o:h" options; do
+while getopts ":u:r:b:o:x:h" options; do
   case "${options}" in
     u)
       AWS_USER_NAME=${OPTARG}
@@ -39,6 +46,9 @@ while getopts ":u:r:b:o:h" options; do
       ;;
     h)
       exit_help
+      ;;
+    x)
+      remove_func
       ;;
     :)
       echo "ERROR: -${OPTARG} requires an argument."
