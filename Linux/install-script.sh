@@ -26,7 +26,7 @@ rflag=false
 bflag=false
 oflag=false
 
-while getopts ":u:r:b:o:x:h" options; do
+while getopts ":u:r:b:o:xh" options; do
   case "${options}" in
     u)
       AWS_USER_NAME=${OPTARG}
