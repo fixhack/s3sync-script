@@ -18,7 +18,7 @@ remove_func() {
   cp /etc/crontab /etc/crontab.bk
   grep -v 's3-synchronization-job.sh' /etc/crontab.bk > /etc/crontab
   userdel -f -r sap-s3-sync
-  groupadd sap-s3-sync
+  groupdel sap-s3-sync
   exit 0
 }
 
