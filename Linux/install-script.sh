@@ -21,8 +21,12 @@ exit_help() {
 }
 
 remove_func() {
-  cp /etc/crontab /etc/crontab.bk
-  grep -v 's3-synchronization-job.sh' /etc/crontab.bk > /etc/crontab
+  if [ -w /etc/crontab ]; then
+    cp /etc/crontab /etc/crontab.bk
+    grep -v 's3-synchronization-job.sh' /etc/crontab.bk > /etc/crontab
+  else
+    echo "warning: File /etc/crontab is not writable. The script will not be removed from crontab."
+  fi
   rm -Rf /home/$OS_USERNAME/awscli-scripts/
   
   exit 0
@@ -99,7 +103,7 @@ install_files() {
     touch /home/$OS_USERNAME/.aws/credentials
     chown $OS_USERNAME:$OS_USERNAME /home/$OS_USERNAME/.aws/credentials
     chmod u=rwx,g=r /home/$OS_USERNAME/.aws/credentials
-    
+
     create_aws_config_file 
   fi 
 
