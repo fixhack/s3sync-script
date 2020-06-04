@@ -15,6 +15,9 @@ print_debug() {
   fi
 }
 
+
+print_debug "Initializing script..."
+
 while getopts ":b:o:h" options; do
   case "${options}" in
     b)
@@ -45,6 +48,8 @@ if [ "$S3BUCKETNAME" == "" ]; then
   S3BUCKETNAME="csg-dev-zfia-analytics-apdocumentsc789d3eb-v8hk9ah5euyw"
 fi
 
+print_debug "Setting variables..."
+
 WORKINGDIR="$HOME/awscli-scripts"
 
 LOGSDIR="$WORKINGDIR/logs"
@@ -52,8 +57,10 @@ LOGSPATH="$WORKINGDIR/synchS3.log"
 S3APPROVED="s3://$S3BUCKETNAME/invoices/approved/"
 S3SYNCHRONIZED="s3://$S3BUCKETNAME/invoices/synchronized/"
 
+print_debug "Getting date..."
 CURRDATE=`date`
 
+print_debug "Creating files & directories..."
 [ ! -d $AWSCLIDIR ] && mkdir -p $AWSCLIDIR 
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
