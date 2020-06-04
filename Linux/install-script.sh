@@ -30,7 +30,7 @@ remove_func() {
   else
     echo "warning: File /var/spool/cron/crontabs/captiva is not writable. The script will not be removed from crontab."
   fi
-  rm -Rf /home/$OS_USERNAME/awscli-scripts/
+  rm -Rf ${INSTALL_DIR}
   
   echo "s3-synchronization-job Uninstalled"
   exit 0
@@ -116,13 +116,13 @@ install_files() {
 
   if [ ! -f /var/spool/cron/crontabs/captiva ]; then
     echo "warning: File /var/spool/cron/crontabs/captiva does not exist. Creating."
-    echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" > /etc/crontab
+    echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" > /etc/crontab
   elif [ ! -w /var/spool/cron/crontabs/captiva ]; then
     echo "warning: File /etc/crontab is not writable. The script will not be executing periodically."
   else 
     EXISTS_TASK=`cat /var/spool/cron/crontabs/captiva | grep "s3-synchronization-job.sh"`
     if [ "${EXISTS_TASK}" == "" ]; then
-      echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
+      echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" >> /etc/crontab 
     fi
   fi
 
@@ -131,6 +131,10 @@ install_files() {
 
 if [ "${OS_USERNAME}" == "" ]; then
   export OS_USERNAME=captiva
+fi
+
+if [ "${INSTALL_DIR}" == "" ]; then
+  export INSTALL_DIR=/home/$OS_USERNAME/awscli-scripts
 fi
 
 uflag=false
@@ -183,7 +187,7 @@ if [ ${rflag} != true ]; then
 fi
 
 if [ "${OUTPUT_DIR}" == "" ]; then
-  export OUTPUT_DIR=/home/$OS_USERNAME/
+  export OUTPUT_DIR=/$OS_USERNAME/
 fi
 
 if [ ${bflag} != true ]; then
