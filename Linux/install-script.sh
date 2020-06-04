@@ -32,7 +32,12 @@ install_files() {
   install -o $3 -g $3 -m u=rwx,g=r -d /home/$3/.aws/
   install -o $3 -g $3 -m u=rwx,g=r -d /home/$3/awscli-scripts/
   install -o $3 -g $3 -m u=rwx,g=r ./s3-synchronization-job.sh /home/$3/awscli-scripts/
-  install -o $3 -g $3 -m u=rwx,g=r ./credentials /home/$3/.aws/
+
+  cat <<EOF >> /home/$3/.aws/credentials
+[SAP_S3_SYNCHRONIZER]
+aws_access_key_id = $4
+aws_secret_access_key = $5 
+EOF
 
   echo "*/5 * * * * sap-s3-sync /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
 }
@@ -116,6 +121,12 @@ export AWS_ACCESS_KEY_ID=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sy
 export AWS_SECRET_ACCESS_KEY=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['Credentials']['SecretAccessKey']; print(info)"`
 export AWS_SESSION_TOKEN=`echo ${AWS_ASSUME_ROLE_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['Credentials']['SessionToken']; print(info)"`
 
+if [ "$DEBUG" == true ]; then
+  echo "Installation User AWS_ACCESS_KEY: ${AWS_ACCESS_KEY_ID}"
+  echo "Installation User AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}"
+  echo "Installation User AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}"
+fi
+
 #PYTHONVERSION=`python -V 2>&1 | grep -Po '(?<=Python )(.+)'`
 AWS_CREATE_ACCESS_KEY_COMMAND=`aws iam create-access-key --user-name ${AWS_USER_NAME}`
 
@@ -127,10 +138,9 @@ fi
 ACCESSKEYID=`echo ${AWS_CREATE_ACCESS_KEY_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['AccessKey']['AccessKeyId']; print(info)"`
 SECRETACCESSKEY=`echo ${AWS_CREATE_ACCESS_KEY_COMMAND} | python -c "import sys, json; info = json.load(sys.stdin)['AccessKey']['SecretAccessKey']; print(info)"`
 
-cat <<EOF > ./credentials
-[default]
-aws_access_key_id = ${ACCESSKEYID}
-aws_secret_access_key = ${SECRETACCESSKEY} 
-EOF
+if [ "$DEBUG" == true ]; then
+  echo ${ACCESSKEYID}
+  echo ${SECRETACCESSKEY}
+fi
 
-install_files ${S3_BUCKET_NAME} ${OUTPUT_DIR} ${OS_USERNAME}
+install_files ${S3_BUCKET_NAME} ${OUTPUT_DIR} ${OS_USERNAME} ${ACCESSKEYID} ${SECRETACCESSKEY}
