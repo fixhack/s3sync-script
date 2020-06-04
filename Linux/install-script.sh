@@ -22,6 +22,23 @@ remove_func() {
   exit 0
 }
 
+install_files() {
+  EXISTS_USER=`awk -F':' '{print $1}' /etc/passwd | grep "$3"`
+  if [ "${EXISTS_USER}" == "" ]; then
+    groupadd $3
+    useradd -m -s /usr/sbin/nologin -g $3 $3
+  fi
+
+  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/$3/.aws/
+  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/$3/awscli-scripts/
+  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./s3-synchronization-job.sh /home/$3/awscli-scripts/
+  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./credentials /home/$3/.aws/
+
+  echo "*/5 * * * * sap-s3-sync /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
+}
+
+OS_USERNAME=captiva
+
 uflag=false
 rflag=false
 bflag=false
@@ -114,12 +131,4 @@ aws_access_key_id = ${ACCESSKEYID}
 aws_secret_access_key = ${SECRETACCESSKEY} 
 EOF
 
-groupadd sap-s3-sync
-useradd -m -s /usr/sbin/nologin -g sap-s3-sync sap-s3-sync
-
-install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/sap-s3-sync/.aws/
-install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/sap-s3-sync/awscli-scripts/
-install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./s3-synchronization-job.sh /home/sap-s3-sync/awscli-scripts/
-install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./credentials /home/sap-s3-sync/.aws/
-
-echo "*/5 * * * * sap-s3-sync /home/sap-s3-sync/awscli-scripts/s3-synchronization-job.sh -b ${S3_BUCKET_NAME} -o ${OUTPUT_DIR}" >> /etc/crontab 
+install_files ${S3_BUCKET_NAME} ${OUTPUT_DIR} ${OS_USERNAME}

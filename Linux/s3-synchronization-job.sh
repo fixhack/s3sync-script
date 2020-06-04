@@ -58,7 +58,6 @@ if [ "$?" != 0 ]; then
     echo "ERROR: ${S3SYNCRESPONSE}" >> $LOGSPATH
 fi
 
-#GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | grep -oP 's3:\/\/.[^\s]*'`
 GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | python -c "import sys, re; info = re.findall('s3:\/\/.[^\s]*', sys.stdin.read()); y = [line for line in info]; s = '\n'.join(y); print(s)"`
 
 if [ "${GREPRESPONSE}" != "" ]; then
