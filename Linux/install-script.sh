@@ -90,7 +90,7 @@ install_files() {
     create_aws_config_file 
   fi 
 
-  if [ ! -w /etc/crotab ]; then
+  if [ ! -w /etc/crontab ]; then
     echo "warning: File /etc/crontab is not writable. The script will not be executing periodically."
   else 
     echo "*/5 * * * * $OS_USERNAME /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
