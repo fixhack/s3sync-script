@@ -116,13 +116,13 @@ install_files() {
 
   if [ ! -f /var/spool/cron/crontabs/captiva ]; then
     echo "warning: File /var/spool/cron/crontabs/captiva does not exist. Creating."
-    echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" > /etc/crontab
+    echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" > /var/spool/cron/crontabs/captiva
   elif [ ! -w /var/spool/cron/crontabs/captiva ]; then
     echo "warning: File /etc/crontab is not writable. The script will not be executing periodically."
   else 
     EXISTS_TASK=`cat /var/spool/cron/crontabs/captiva | grep "s3-synchronization-job.sh"`
     if [ "${EXISTS_TASK}" == "" ]; then
-      echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" >> /etc/crontab 
+      echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" >> /var/spool/cron/crontabs/captiva 
     fi
   fi
 
