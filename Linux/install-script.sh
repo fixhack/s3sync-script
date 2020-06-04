@@ -23,8 +23,7 @@ exit_help() {
 remove_func() {
   cp /etc/crontab /etc/crontab.bk
   grep -v 's3-synchronization-job.sh' /etc/crontab.bk > /etc/crontab
-  userdel -f -r sap-s3-sync
-  groupdel sap-s3-sync
+
   exit 0
 }
 
@@ -49,7 +48,7 @@ install_files() {
 
   if [ -f "/home/$3/.aws/credentials" ]; then
     print_debug "File /home/$3/.aws/credentials exists"
-    EXISTS_PROFILE=`cat /home/$3/.aws/credentials exists | grep 'SAP_S3_SYNCHRONIZER'`
+    EXISTS_PROFILE=`cat /home/$3/.aws/credentials | grep 'SAP_S3_SYNCHRONIZER'`
     if [ "${EXISTS_PROFILE}" == "" ]; then
       create_aws_config_file $3 $4 $5
     fi
@@ -57,17 +56,16 @@ install_files() {
     create_aws_config_file $3 $4 $5
   fi 
 
-  echo "*/5 * * * * $3 /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
+  echo "*/5 * * * * $OS_USERNAME /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
 }
 
 if [ "${OS_USERNAME}" == "" ]; then
-  OS_USERNAME=captiva
+  export OS_USERNAME=captiva
 fi
 
 uflag=false
 rflag=false
 bflag=false
-oflag=false
 
 while getopts ":u:r:b:o:xh" options; do
   case "${options}" in
@@ -85,7 +83,6 @@ while getopts ":u:r:b:o:xh" options; do
       ;;
     o)
       OUTPUT_DIR=${OPTARG}
-      oflag=true
       ;;
     h)
       exit_help
@@ -113,9 +110,8 @@ if [ ${rflag} != true ]; then
   exit_abnormal
 fi
 
-if [ ${oflag} != true ]; then
-  echo "ERROR: option -o is required."
-  exit_abnormal
+if [ ${OUTPUT_DIR} == "" ]; then
+  OUTPUT_DIR=/home/$OS_USERNAME/
 fi
 
 if [ ${bflag} != true ]; then
