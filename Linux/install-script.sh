@@ -29,15 +29,17 @@ install_files() {
     useradd -m -s /usr/sbin/nologin -g $3 $3
   fi
 
-  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/$3/.aws/
-  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r -d /home/$3/awscli-scripts/
-  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./s3-synchronization-job.sh /home/$3/awscli-scripts/
-  install -o sap-s3-sync -g sap-s3-sync -m u=rwx,g=r ./credentials /home/$3/.aws/
+  install -o $3 -g $3 -m u=rwx,g=r -d /home/$3/.aws/
+  install -o $3 -g $3 -m u=rwx,g=r -d /home/$3/awscli-scripts/
+  install -o $3 -g $3 -m u=rwx,g=r ./s3-synchronization-job.sh /home/$3/awscli-scripts/
+  install -o $3 -g $3 -m u=rwx,g=r ./credentials /home/$3/.aws/
 
   echo "*/5 * * * * sap-s3-sync /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
 }
 
-OS_USERNAME=captiva
+if [ "${OS_USERNAME}" == "" ]; then
+  OS_USERNAME=captiva
+fi
 
 uflag=false
 rflag=false
