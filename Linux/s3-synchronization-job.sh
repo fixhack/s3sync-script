@@ -45,7 +45,6 @@ LOGSDIR="$WORKINGDIR/logs"
 LOGSPATH="$WORKINGDIR/synchS3.log"
 S3APPROVED="s3://$S3BUCKETNAME/invoices/approved/"
 S3SYNCHRONIZED="s3://$S3BUCKETNAME/invoices/synchronized/"
-AWS_PROFILE=SAP_S3_SYNCHRONIZER
 
 CURRDATE=`date`
 
@@ -53,7 +52,7 @@ CURRDATE=`date`
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
-S3SYNCHRESPONSE=`aws s3 sync $S3APPROVED $OUTPUTDIR 2>&1 | tee -a $LOGSPATH`
+S3SYNCHRESPONSE=`aws --profile SAP_S3_SYNCHRONIZER s3 sync $S3APPROVED $OUTPUTDIR 2>&1 | tee -a $LOGSPATH`
 
 if [ "$?" != 0 ]; then
     echo "ERROR: ${S3SYNCRESPONSE}" >> $LOGSPATH
@@ -64,7 +63,7 @@ GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | python -c "import sys, re; info = re.f
 if [ "${GREPRESPONSE}" != "" ]; then
     FILECOUNT=0
     for item in ${GREPRESPONSE}; do
-        S3MOVERESPONSE=`aws s3 mv $item $S3SYNCHRONIZED 2>&1 | tee -a $LOGSPATH`
+        S3MOVERESPONSE=`aws --profile SAP_S3_SYNCHRONIZER s3 mv $item $S3SYNCHRONIZED 2>&1 | tee -a $LOGSPATH`
         ((FILECOUNT=FILECOUNT+1))
     done
     echo "$FILECOUNT file/s synchronized and moved on $CURRDATE" >> $LOGSPATH
