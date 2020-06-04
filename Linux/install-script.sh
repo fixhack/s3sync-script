@@ -28,7 +28,7 @@ remove_func() {
   exit 0
 }
 
-create_aws_file() {
+create_aws_config_file() {
   AWS_ASSUME_ROLE_COMMAND=`aws sts assume-role --role-arn "${AWS_ROLE_ARN}" --role-session-name AWSCLI-Session`
 
   if [ "$?" != 0 ]; then
@@ -76,18 +76,18 @@ install_files() {
     useradd -m -s /usr/sbin/nologin -g $OS_USERNAME $OS_USERNAME
   fi
 
-  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r -d /home/$OS_USERNAME/.aws/
   install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r -d /home/$OS_USERNAME/awscli-scripts/
   install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r ./s3-synchronization-job.sh /home/$OS_USERNAME/awscli-scripts/
 
+  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r -d /home/$OS_USERNAME/.aws/
   if [ -f "/home/$OS_USERNAME/.aws/credentials" ]; then
     print_debug "File /home/$OS_USERNAME/.aws/credentials exists"
     EXISTS_PROFILE=`cat /home/$OS_USERNAME/.aws/credentials | grep 'SAP_S3_SYNCHRONIZER'`
     if [ "${EXISTS_PROFILE}" == "" ]; then
-      create_aws_config_file $OS_USERNAME $4 $5
+      create_aws_config_file 
     fi
   else 
-    create_aws_config_file $OS_USERNAME $4 $5
+    create_aws_config_file 
   fi 
 
   echo "*/5 * * * * $OS_USERNAME /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
