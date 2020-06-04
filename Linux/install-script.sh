@@ -116,7 +116,7 @@ while getopts ":u:r:b:o:xh" options; do
       bflag=true
       ;;
     o)
-      if [ "${OPTARG}" != "" ]: then
+      if [ "${OPTARG}" != "" ]; then
         export OUTPUT_DIR=${OPTARG}
       fi
       ;;
