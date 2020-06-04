@@ -4,6 +4,12 @@ usage() {
   echo "Usage: $0 [ -h ] [ -x ] [ -u AWS_USER_NAME -r ROLE_ARN -b S3_BUCKET_NAME -o OUTPUT_DIR ]" 1>&2
 }
 
+print_debug() {
+  if [ "$DEBUG" == true ]; then
+    echo $1
+  fi
+}
+
 exit_abnormal() {
   usage
   exit 1
@@ -22,6 +28,14 @@ remove_func() {
   exit 0
 }
 
+create_aws_file() {
+    cat <<EOF >> /home/$1/.aws/credentials
+[SAP_S3_SYNCHRONIZER]
+aws_access_key_id = $2
+aws_secret_access_key = $3 
+EOF
+}
+
 install_files() {
   EXISTS_USER=`awk -F':' '{print $1}' /etc/passwd | grep "$3"`
   if [ "${EXISTS_USER}" == "" ]; then
@@ -33,13 +47,17 @@ install_files() {
   install -o $3 -g $3 -m u=rwx,g=r -d /home/$3/awscli-scripts/
   install -o $3 -g $3 -m u=rwx,g=r ./s3-synchronization-job.sh /home/$3/awscli-scripts/
 
-  cat <<EOF >> /home/$3/.aws/credentials
-[SAP_S3_SYNCHRONIZER]
-aws_access_key_id = $4
-aws_secret_access_key = $5 
-EOF
+  if [ -f "/home/$3/.aws/credentials" ]; then
+    print_debug "File /home/$3/.aws/credentials exists"
+    EXISTS_PROFILE=`cat /home/$3/.aws/credentials exists | grep 'SAP_S3_SYNCHRONIZER'`
+    if [ "${EXISTS_PROFILE}" == "" ]; then
+      create_aws_config_file $3 $4 $5
+    fi
+  else 
+    create_aws_config_file $3 $4 $5
+  fi 
 
-  echo "*/5 * * * * sap-s3-sync /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
+  echo "*/5 * * * * $3 /home/$3/awscli-scripts/s3-synchronization-job.sh -b $1 -o $2" >> /etc/crontab 
 }
 
 if [ "${OS_USERNAME}" == "" ]; then
