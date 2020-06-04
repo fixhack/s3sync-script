@@ -110,7 +110,7 @@ if [ ${rflag} != true ]; then
   exit_abnormal
 fi
 
-if [ ${OUTPUT_DIR} == "" ]; then
+if [ "${OUTPUT_DIR}" == "" ]; then
   OUTPUT_DIR=/home/$OS_USERNAME/
 fi
 
