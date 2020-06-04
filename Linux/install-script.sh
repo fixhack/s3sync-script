@@ -76,10 +76,19 @@ install_files() {
     useradd -m -s /usr/sbin/nologin -g $OS_USERNAME $OS_USERNAME
   fi
 
-  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r -d /home/$OS_USERNAME/awscli-scripts/
-  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r ./s3-synchronization-job.sh /home/$OS_USERNAME/awscli-scripts/
+  if [ ! -d /home/$OS_USERNAME/awscli-scripts/ ]; then
+    mkdir /home/$OS_USERNAME/awscli-scripts/
+  fi
 
-  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r -d /home/$OS_USERNAME/.aws/
+  if [ ! -d /home/$OS_USERNAME/.aws/ ]; then
+    mkdir /home/$OS_USERNAME/.aws/
+  fi
+  
+  cp ./s3-synchronization-job.sh /home/$OS_USERNAME/awscli-scripts/
+  chown $OS_USERNAME:$OS_USERNAME /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh
+  chmod u=rwx,g=r /home/$OS_USERNAME/awscli-scripts/s3-synchronization-job.sh
+#  install -o $OS_USERNAME -g $OS_USERNAME -m u=rwx,g=r ./s3-synchronization-job.sh /home/$OS_USERNAME/awscli-scripts/
+
   if [ -f "/home/$OS_USERNAME/.aws/credentials" ]; then
     print_debug "File /home/$OS_USERNAME/.aws/credentials exists"
     EXISTS_PROFILE=`cat /home/$OS_USERNAME/.aws/credentials | grep 'SAP_S3_SYNCHRONIZER'`
@@ -87,6 +96,10 @@ install_files() {
       create_aws_config_file 
     fi
   else 
+    touch /home/$OS_USERNAME/.aws/credentials
+    chown $OS_USERNAME:$OS_USERNAME /home/$OS_USERNAME/.aws/credentials
+    chmod u=rwx,g=r /home/$OS_USERNAME/.aws/credentials
+    
     create_aws_config_file 
   fi 
 
