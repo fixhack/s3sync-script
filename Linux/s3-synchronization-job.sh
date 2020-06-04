@@ -9,6 +9,12 @@ exit_abnormal() {
   exit 1
 }
 
+print_debug() {
+  if [ "$DEBUG" == true ]; then
+    echo $1
+  fi
+}
+
 while getopts ":b:o:h" options; do
   case "${options}" in
     b)
@@ -52,18 +58,24 @@ CURRDATE=`date`
 [ ! -d $LOGSDIR ] && mkdir -p $LOGSDIR 
 [ ! -f $LOGSPATH ] && touch $LOGSPATH
 
+print_debug "Executing: aws --profile SAP_S3_SYNCHRONIZER s3 sync $S3APPROVED $OUTPUTDIR"
 S3SYNCHRESPONSE=`aws --profile SAP_S3_SYNCHRONIZER s3 sync $S3APPROVED $OUTPUTDIR 2>&1 | tee -a $LOGSPATH`
+print_debug "Command executed."
 
 if [ "$?" != 0 ]; then
     echo "ERROR: ${S3SYNCRESPONSE}" >> $LOGSPATH
 fi
 
+print_debug "Spliting paths"
 GREPRESPONSE=`echo "${S3SYNCHRESPONSE}" | python -c "import sys, re; info = re.findall('s3:\/\/.[^\s]*', sys.stdin.read()); y = [line for line in info]; s = '\n'.join(y); print(s)"`
+print_debug "Splitted."
 
 if [ "${GREPRESPONSE}" != "" ]; then
     FILECOUNT=0
     for item in ${GREPRESPONSE}; do
+        print_debug "aws --profile SAP_S3_SYNCHRONIZER s3 mv $item $S3SYNCHRONIZED"
         S3MOVERESPONSE=`aws --profile SAP_S3_SYNCHRONIZER s3 mv $item $S3SYNCHRONIZED 2>&1 | tee -a $LOGSPATH`
+        print_debug "Command executed."
         ((FILECOUNT=FILECOUNT+1))
     done
     echo "$FILECOUNT file/s synchronized and moved on $CURRDATE" >> $LOGSPATH
