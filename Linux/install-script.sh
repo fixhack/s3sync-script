@@ -27,6 +27,7 @@ remove_func() {
     if [ "$?" == 0 ]; then
         rm -Rf /var/spool/cron/crontabs/captiva.bk
     fi
+    echo "Cron job were successfully uninstall from file /var/spool/cron/crontabs/captiva"
   else
     echo "warning: File /var/spool/cron/crontabs/captiva is not writable. The script will not be removed from crontab."
   fi
@@ -123,7 +124,9 @@ install_files() {
     EXISTS_TASK=`cat /var/spool/cron/crontabs/captiva | grep "s3-synchronization-job.sh"`
     if [ "${EXISTS_TASK}" == "" ]; then
       echo "0,15,30,45 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 * * 1-5 ${INSTALL_DIR}/s3-synchronization-job.sh -b $S3_BUCKET_NAME -o $OUTPUT_DIR" >> /var/spool/cron/crontabs/captiva 
-    fi
+    else
+      echo "The cron job are already on the File /var/spool/cron/crontabs/captiva"
+    fi 
   fi
 
   echo "s3-synchronization-job Installed"
